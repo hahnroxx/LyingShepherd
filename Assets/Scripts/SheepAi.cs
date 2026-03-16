@@ -28,8 +28,16 @@ public class SheepAI : MonoBehaviour
     public float hopHeight = 0.5f;   // 점프 높이
     public float hopSpeed = 10f;    // 점프 속도
 
+    [Header("Audio Settings")]
+    public AudioClip bleatSound;       // '메에' 소리 파일 연결
+    public float bleatCooldown = 3f;   // 너무 자주 울지 않게 쿨타임
+    private float lastBleatTime;
+
+    private AudioSource audioSource;
+
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         agent = GetComponent<NavMeshAgent>();
 
         // 터레인 안착: 시작 시 공중에 떠 있지 않도록 강제 워프 시킵니다.
@@ -74,6 +82,7 @@ public class SheepAI : MonoBehaviour
         }
 
         HandleProceduralAnimation();
+
     }
 
     // 플레이어의 "늑대다!" 외침 신호를 받는 함수입니다.
@@ -81,8 +90,10 @@ public class SheepAI : MonoBehaviour
     {
         currentState = SheepState.Panic;
         panicTimer = panicDuration;
+        PlayBleat(); // 소리 지르며 도망!
     }
 
+    
     void HandlePanicMovement()
     {
         Vector3 flockCenter = GetFlockCenter(); // 무리의 중심점을 찾습니다.
@@ -147,7 +158,7 @@ public class SheepAI : MonoBehaviour
 
             
         }
-        else if (currentState == SheepState.Fleeing && speed > 0.05f)
+        else if (currentState == SheepState.Fleeing && speed > 0f)
         {
             // 평소 도망칠 때: 튀지 않고 몸을 좌우로 살짝 흔들어 '걷는' 느낌만 줍니다.
             bodyTransform.localPosition = Vector3.zero; // 위아래로 튀지 않음
@@ -173,6 +184,20 @@ public class SheepAI : MonoBehaviour
             gameObject.SetActive(false);
 
             // 여기서 신뢰도를 조금 회복시키거나 점수를 올리는 처리를 합니다.
+        }
+    }
+
+    // 울음소리를 재생하는 함수
+    public void PlayBleat()
+    {
+        // 쿨타임 확인 및 소리가 이미 재생 중인지 확인
+        if (Time.time >= lastBleatTime + bleatCooldown)
+        {
+            // 1인 개발 팁: 목소리 톤을 랜덤하게 바꿔서 개성을 줍니다!
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(bleatSound);
+            lastBleatTime = Time.time;
+            
         }
     }
 }

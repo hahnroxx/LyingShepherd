@@ -7,17 +7,19 @@ public class PlayerClickMovement : MonoBehaviour
     public LayerMask groundLayer;
     public GameObject markerPrefab;
     private GameObject spawnedMarker;
-    public float markerDuration = 1.0f; // 마커가 머무를 시간
+    public float markerDuration = 1.0f;
 
     [Header("Movement Settings")]
-    // 인스펙터에서 수정 가능한 이동 속도 변수입니다.
     public float moveSpeed = 8f;
 
-    // 회전 속도도 조절하고 싶으시다면 추가하세요.
-    public float rotationSpeed = 120f;
+    // snappy한 회전을 위해 값을 720 정도로 높게 잡는 걸 추천합니다!
+    public float rotationSpeed = 720f;
+
+    // 미끄러짐을 방지하는 핵심 변수입니다.
+    public float acceleration = 50f;
 
     private Animator anim;
-    
+
 
     void Start()
     {
@@ -66,7 +68,9 @@ public class PlayerClickMovement : MonoBehaviour
         if (agent != null)
         {
             agent.speed = moveSpeed;
-            agent.angularSpeed = rotationSpeed;
+            // 아래 두 줄이 추가되어야 미끄러짐과 선회가 해결됩니다!
+            agent.angularSpeed = rotationSpeed; // 회전 속도 적용
+            agent.acceleration = acceleration; // 가속도 적용
         }
     }
 
